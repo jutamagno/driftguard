@@ -17,10 +17,10 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
-import redis
-from kafka import KafkaConsumer
-
-from driftguard.drift.detector import FeatureDriftMonitor, DriftAlert
+try:
+    from driftguard.drift.detector import FeatureDriftMonitor, DriftAlert
+except ModuleNotFoundError:
+    from src.drift.detector import FeatureDriftMonitor, DriftAlert
 
 
 try:
@@ -107,6 +107,8 @@ class FeaturePipeline:
         redis_port: int = 6379,
         topic: str = "clickstream",
     ):
+        from kafka import KafkaConsumer
+        import redis as redis_lib
         self.consumer = KafkaConsumer(
             topic,
             bootstrap_servers=kafka_servers,
@@ -114,7 +116,7 @@ class FeaturePipeline:
             auto_offset_reset="latest",
             group_id="feature-pipeline",
         )
-        self.redis = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+        self.redis = redis_lib.Redis(host=redis_host, port=redis_port, decode_responses=True)
         self.aggregator = SlidingWindowAggregator(window_seconds=3600)
         self.drift_monitor = FeatureDriftMonitor(
             features=["user_ctr_1h", "item_ctr_1h", "category_ctr_1h"]

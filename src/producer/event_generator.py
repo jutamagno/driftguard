@@ -16,7 +16,6 @@ import time
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Generator
-from kafka import KafkaProducer
 
 
 @dataclass
@@ -82,6 +81,7 @@ def generate_events(
 
 class EventProducer:
     def __init__(self, bootstrap_servers: str = "localhost:9092", topic: str = "clickstream"):
+        from kafka import KafkaProducer
         self.producer = KafkaProducer(
             bootstrap_servers=bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),

@@ -121,7 +121,10 @@ class PageHinkley:
 
     def update(self, value: float) -> bool:
         self._n += 1
-        self._mean = self._mean * self.alpha + value * (1 - self.alpha)
+        if self._n == 1:
+            self._mean = value  # warm-start to avoid false positives at startup
+        else:
+            self._mean = self._mean * self.alpha + value * (1 - self.alpha)
         self._sum += value - self._mean - self.delta
         self._ph_min = min(self._ph_min, self._sum)
         self._ph = self._sum - self._ph_min
